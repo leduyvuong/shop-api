@@ -2,18 +2,1838 @@ openapi: 3.0.1
 info:
   title: Shop API
   version: v1
+  description: |
+    RESTful e-commerce API cung cấp bởi Shop API. Tất cả response trả về theo dạng chuẩn:
+
+    ```json
+    {
+      "success": true,
+      "data": {},
+      "message": "Successfully"
+    }
+    ```
 servers:
   - url: http://localhost:3000
+    description: Local development
+  - url: https://api.example.com
+    description: Production
+security:
+  - bearerAuth: []
 paths:
-  /api/v1/products:
-    get:
-      summary: Danh sách sản phẩm
-      responses:
-        '200':
-          description: OK
-  /api/v1/orders:
+  /api/v1/auth/sign_up:
     post:
-      summary: Tạo đơn hàng
+      tags: [Auth]
+      summary: Đăng ký tài khoản mới
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthSignUpRequest'
       responses:
         '201':
-          description: Created
+          description: Tạo tài khoản thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          description: Dữ liệu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/auth/sign_in:
+    post:
+      tags: [Auth]
+      summary: Đăng nhập và lấy JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthSignInRequest'
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Sai thông tin đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/auth/sign_out:
+    delete:
+      tags: [Auth]
+      summary: Đăng xuất khỏi hệ thống
+      responses:
+        '200':
+          description: Đăng xuất thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRefreshRequest'
+      responses:
+        '200':
+          description: Refresh token thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+  /api/v1/auth/forgot_password:
+    post:
+      tags: [Auth]
+      summary: Gửi email quên mật khẩu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Email reset được gửi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/auth/reset_password:
+    post:
+      tags: [Auth]
+      summary: Đặt lại mật khẩu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Reset mật khẩu thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/users:
+    get:
+      tags: [Users]
+      summary: Danh sách người dùng (admin)
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Danh sách user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCollectionResponse'
+    post:
+      tags: [Users]
+      summary: Tạo người dùng (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '201':
+          description: Tạo user thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /api/v1/users/{id}:
+    get:
+      tags: [Users]
+      summary: Xem chi tiết người dùng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    put:
+      tags: [Users]
+      summary: Cập nhật người dùng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    delete:
+      tags: [Users]
+      summary: Xóa người dùng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/categories:
+    get:
+      tags: [Categories]
+      summary: Danh sách danh mục
+      responses:
+        '200':
+          description: Danh sách danh mục
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryCollectionResponse'
+    post:
+      tags: [Categories]
+      summary: Tạo danh mục
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+      responses:
+        '201':
+          description: Tạo danh mục thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+  /api/v1/categories/{id}:
+    get:
+      tags: [Categories]
+      summary: Chi tiết danh mục
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Danh mục
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+    put:
+      tags: [Categories]
+      summary: Cập nhật danh mục
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+    delete:
+      tags: [Categories]
+      summary: Xóa danh mục
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/categories/{category_id}/products:
+    get:
+      tags: [Products]
+      summary: Danh sách sản phẩm theo danh mục
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Danh sách sản phẩm
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCollectionResponse'
+  /api/v1/products:
+    get:
+      tags: [Products]
+      summary: Danh sách sản phẩm
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Từ khóa tìm kiếm
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: Sắp xếp (price asc, price desc, newest)
+      responses:
+        '200':
+          description: Danh sách sản phẩm
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCollectionResponse'
+    post:
+      tags: [Products]
+      summary: Tạo sản phẩm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductRequest'
+      responses:
+        '201':
+          description: Tạo sản phẩm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+  /api/v1/products/{id}:
+    get:
+      tags: [Products]
+      summary: Chi tiết sản phẩm
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết sản phẩm
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+    put:
+      tags: [Products]
+      summary: Cập nhật sản phẩm
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+    delete:
+      tags: [Products]
+      summary: Xóa sản phẩm
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/products/{product_id}/variants:
+    get:
+      tags: [Variants]
+      summary: Danh sách biến thể của sản phẩm
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Danh sách biến thể
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantCollectionResponse'
+    post:
+      tags: [Variants]
+      summary: Tạo biến thể
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VariantRequest'
+      responses:
+        '201':
+          description: Tạo biến thể thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantResponse'
+  /api/v1/products/{product_id}/variants/{id}:
+    put:
+      tags: [Variants]
+      summary: Cập nhật biến thể
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VariantRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantResponse'
+    delete:
+      tags: [Variants]
+      summary: Xóa biến thể
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/products/{product_id}/product_images:
+    get:
+      tags: [Product Images]
+      summary: Danh sách hình ảnh của sản phẩm
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Danh sách hình ảnh
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductImageCollectionResponse'
+    post:
+      tags: [Product Images]
+      summary: Thêm hình ảnh cho sản phẩm
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductImageRequest'
+      responses:
+        '201':
+          description: Tạo hình ảnh thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductImageResponse'
+  /api/v1/products/{product_id}/product_images/{id}:
+    delete:
+      tags: [Product Images]
+      summary: Xóa hình ảnh của sản phẩm
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/products/{product_id}/reviews:
+    get:
+      tags: [Reviews]
+      summary: Danh sách đánh giá theo sản phẩm
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Danh sách đánh giá
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewCollectionResponse'
+    post:
+      tags: [Reviews]
+      summary: Tạo đánh giá cho sản phẩm
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+      responses:
+        '201':
+          description: Tạo đánh giá thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+  /api/v1/reviews:
+    get:
+      tags: [Reviews]
+      summary: Danh sách đánh giá
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Danh sách đánh giá
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewCollectionResponse'
+  /api/v1/reviews/{id}:
+    get:
+      tags: [Reviews]
+      summary: Chi tiết đánh giá
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết đánh giá
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+    put:
+      tags: [Reviews]
+      summary: Cập nhật đánh giá
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+    delete:
+      tags: [Reviews]
+      summary: Xóa đánh giá
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/cart:
+    get:
+      tags: [Cart]
+      summary: Lấy danh sách sản phẩm trong giỏ hàng
+      responses:
+        '200':
+          description: Danh sách giỏ hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartCollectionResponse'
+    post:
+      tags: [Cart]
+      summary: Thêm sản phẩm vào giỏ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemRequest'
+      responses:
+        '201':
+          description: Thêm giỏ hàng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItemResponse'
+  /api/v1/cart/{id}:
+    put:
+      tags: [Cart]
+      summary: Cập nhật số lượng sản phẩm trong giỏ
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemUpdateRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItemResponse'
+    delete:
+      tags: [Cart]
+      summary: Xóa sản phẩm khỏi giỏ
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/orders:
+    get:
+      tags: [Orders]
+      summary: Danh sách đơn hàng của người dùng
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Danh sách đơn hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderCollectionResponse'
+    post:
+      tags: [Orders]
+      summary: Tạo đơn hàng mới (Checkout)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '201':
+          description: Tạo đơn hàng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+  /api/v1/orders/{id}:
+    get:
+      tags: [Orders]
+      summary: Chi tiết đơn hàng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết đơn hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+    put:
+      tags: [Orders]
+      summary: Cập nhật đơn hàng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderUpdateRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+    delete:
+      tags: [Orders]
+      summary: Hủy đơn hàng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Hủy thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/orders/{id}/cancel:
+    post:
+      tags: [Orders]
+      summary: Hủy đơn hàng (business flow)
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Đơn hàng được hủy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+  /api/v1/orders/{id}/complete:
+    post:
+      tags: [Orders]
+      summary: Hoàn tất đơn hàng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Đơn hàng hoàn tất
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+  /api/v1/orders/{id}/ship:
+    post:
+      tags: [Orders]
+      summary: Cập nhật trạng thái giao hàng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Cập nhật trạng thái giao hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+  /api/v1/orders/{order_id}/payments:
+    get:
+      tags: [Payments]
+      summary: Danh sách thanh toán theo đơn hàng
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Danh sách thanh toán
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentCollectionResponse'
+    post:
+      tags: [Payments]
+      summary: Tạo thanh toán cho đơn hàng
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Tạo thanh toán thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+  /api/v1/payments:
+    get:
+      tags: [Payments]
+      summary: Danh sách thanh toán
+      responses:
+        '200':
+          description: Danh sách thanh toán
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentCollectionResponse'
+  /api/v1/payments/{id}:
+    get:
+      tags: [Payments]
+      summary: Chi tiết thanh toán
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết thanh toán
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+  /api/v1/coupons:
+    get:
+      tags: [Coupons]
+      summary: Danh sách mã giảm giá
+      responses:
+        '200':
+          description: Danh sách mã giảm giá
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponCollectionResponse'
+  /api/v1/coupons/{id}:
+    get:
+      tags: [Coupons]
+      summary: Chi tiết mã giảm giá
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết mã giảm giá
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponResponse'
+  /api/v1/coupons/apply:
+    post:
+      tags: [Coupons]
+      summary: Áp dụng mã giảm giá cho giỏ hàng/đơn hàng
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouponApplyRequest'
+      responses:
+        '200':
+          description: Áp dụng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponResponse'
+  /api/v1/blog_posts:
+    get:
+      tags: [Blog Posts]
+      summary: Danh sách bài viết blog
+      responses:
+        '200':
+          description: Danh sách bài viết
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostCollectionResponse'
+    post:
+      tags: [Blog Posts]
+      summary: Tạo bài viết blog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogPostRequest'
+      responses:
+        '201':
+          description: Tạo bài viết thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostResponse'
+  /api/v1/blog_posts/{id}:
+    get:
+      tags: [Blog Posts]
+      summary: Chi tiết bài viết
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết bài viết
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostResponse'
+    put:
+      tags: [Blog Posts]
+      summary: Cập nhật bài viết
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogPostRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostResponse'
+    delete:
+      tags: [Blog Posts]
+      summary: Xóa bài viết
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/banners:
+    get:
+      tags: [Banners]
+      summary: Danh sách banner
+      responses:
+        '200':
+          description: Danh sách banner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BannerCollectionResponse'
+    post:
+      tags: [Banners]
+      summary: Tạo banner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BannerRequest'
+      responses:
+        '201':
+          description: Tạo banner thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BannerResponse'
+  /api/v1/banners/{id}:
+    get:
+      tags: [Banners]
+      summary: Chi tiết banner
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết banner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BannerResponse'
+    put:
+      tags: [Banners]
+      summary: Cập nhật banner
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BannerRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BannerResponse'
+    delete:
+      tags: [Banners]
+      summary: Xóa banner
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: Thống kê tổng quan dashboard
+      responses:
+        '200':
+          description: Dữ liệu dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDashboardResponse'
+  /api/v1/admin/reports:
+    get:
+      tags: [Admin]
+      summary: Báo cáo doanh thu
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Dữ liệu báo cáo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReportCollectionResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IdPathParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+      description: Trang hiện tại
+    PerPageParam:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+      description: Số bản ghi mỗi trang
+  schemas:
+    BaseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+      required: [success]
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        errors:
+          type: array
+          items:
+            type: string
+      required: [success, errors]
+    PaginatedMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        per_page:
+          type: integer
+        total_pages:
+          type: integer
+        total_count:
+          type: integer
+    AuthResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+                token:
+                  type: string
+                refresh_token:
+                  type: string
+    AuthSignUpRequest:
+      type: object
+      properties:
+        user:
+          type: object
+          required: [name, email, password]
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+            password:
+              type: string
+            password_confirmation:
+              type: string
+            role:
+              type: string
+              enum: [customer, staff, admin]
+      required: [user]
+    AuthSignInRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    AuthRefreshRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+    ResetPasswordRequest:
+      type: object
+      required: [reset_token, password, password_confirmation]
+      properties:
+        reset_token:
+          type: string
+        password:
+          type: string
+        password_confirmation:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        phone:
+          type: string
+        avatar_url:
+          type: string
+    UserRequest:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+            password:
+              type: string
+            role:
+              type: string
+              enum: [customer, staff, admin]
+            phone:
+              type: string
+      required: [user]
+    UserResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/User'
+    UserCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+            meta:
+              $ref: '#/components/schemas/PaginatedMeta'
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        parent_id:
+          type: integer
+    CategoryRequest:
+      type: object
+      properties:
+        category:
+          type: object
+          required: [name]
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            parent_id:
+              type: integer
+      required: [category]
+    CategoryResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Category'
+    CategoryCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Category'
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        price:
+          type: number
+          format: float
+        sale_price:
+          type: number
+          format: float
+        stock:
+          type: integer
+        status:
+          type: string
+        sku:
+          type: string
+        brand:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Variant'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductImage'
+    ProductRequest:
+      type: object
+      properties:
+        product:
+          type: object
+          required: [name, price, stock, category_id]
+          properties:
+            name:
+              type: string
+            slug:
+              type: string
+            description:
+              type: string
+            price:
+              type: number
+            sale_price:
+              type: number
+            stock:
+              type: integer
+            status:
+              type: string
+              enum: [draft, published, archived]
+            weight:
+              type: number
+            sku:
+              type: string
+            brand:
+              type: string
+            category_id:
+              type: integer
+      required: [product]
+    ProductResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Product'
+    ProductCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+            meta:
+              $ref: '#/components/schemas/PaginatedMeta'
+    ProductImage:
+      type: object
+      properties:
+        id:
+          type: integer
+        image_url:
+          type: string
+    ProductImageRequest:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
+      required: [image]
+    ProductImageResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ProductImage'
+    ProductImageCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProductImage'
+    Variant:
+      type: object
+      properties:
+        id:
+          type: integer
+        option_name:
+          type: string
+        option_value:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+    VariantRequest:
+      type: object
+      properties:
+        variant:
+          type: object
+          required: [option_name, option_value]
+          properties:
+            option_name:
+              type: string
+            option_value:
+              type: string
+            price:
+              type: number
+            stock:
+              type: integer
+      required: [variant]
+    VariantResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Variant'
+    VariantCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Variant'
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+        rating:
+          type: integer
+        comment:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+    ReviewRequest:
+      type: object
+      properties:
+        review:
+          type: object
+          required: [rating]
+          properties:
+            rating:
+              type: integer
+              minimum: 1
+              maximum: 5
+            comment:
+              type: string
+      required: [review]
+    ReviewResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Review'
+    ReviewCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Review'
+            meta:
+              $ref: '#/components/schemas/PaginatedMeta'
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        quantity:
+          type: integer
+        product:
+          $ref: '#/components/schemas/Product'
+    CartItemRequest:
+      type: object
+      properties:
+        cart_item:
+          type: object
+          required: [product_id, quantity]
+          properties:
+            product_id:
+              type: integer
+            quantity:
+              type: integer
+      required: [cart_item]
+    CartItemUpdateRequest:
+      type: object
+      properties:
+        cart_item:
+          type: object
+          required: [quantity]
+          properties:
+            quantity:
+              type: integer
+      required: [cart_item]
+    CartItemResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CartItem'
+    CartCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CartItem'
+    Address:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        province:
+          type: string
+        district:
+          type: string
+        ward:
+          type: string
+        street:
+          type: string
+        default:
+          type: boolean
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        quantity:
+          type: integer
+        price:
+          type: number
+        product:
+          $ref: '#/components/schemas/Product'
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+          enum: [pending, paid, shipped, completed, canceled]
+        total_price:
+          type: number
+        payment_method:
+          type: string
+        shipping_fee:
+          type: number
+        address:
+          $ref: '#/components/schemas/Address'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+    OrderRequest:
+      type: object
+      properties:
+        order:
+          type: object
+          required: [address_id]
+          properties:
+            address_id:
+              type: integer
+            payment_method:
+              type: string
+            coupon_code:
+              type: string
+      required: [order]
+    OrderUpdateRequest:
+      type: object
+      properties:
+        order:
+          type: object
+          properties:
+            status:
+              type: string
+            payment_method:
+              type: string
+            shipping_fee:
+              type: number
+      required: [order]
+    OrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Order'
+    OrderCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Order'
+            meta:
+              $ref: '#/components/schemas/PaginatedMeta'
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        method:
+          type: string
+        status:
+          type: string
+        amount:
+          type: number
+        transaction_id:
+          type: string
+    PaymentRequest:
+      type: object
+      properties:
+        payment:
+          type: object
+          required: [amount, method]
+          properties:
+            amount:
+              type: number
+            method:
+              type: string
+              enum: [cod, vnpay, stripe]
+            transaction_id:
+              type: string
+      required: [payment]
+    PaymentResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Payment'
+    PaymentCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Payment'
+    Coupon:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        discount_type:
+          type: string
+          enum: [percent, amount]
+        discount_value:
+          type: number
+        usage_limit:
+          type: integer
+        used_count:
+          type: integer
+        expired_at:
+          type: string
+          format: date-time
+    CouponResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Coupon'
+    CouponCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Coupon'
+    CouponApplyRequest:
+      type: object
+      properties:
+        coupon:
+          type: object
+          required: [code]
+          properties:
+            code:
+              type: string
+            order_total:
+              type: number
+      required: [coupon]
+    BlogPost:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        content:
+          type: string
+        published:
+          type: boolean
+    BlogPostRequest:
+      type: object
+      properties:
+        blog_post:
+          type: object
+          required: [title, content]
+          properties:
+            title:
+              type: string
+            slug:
+              type: string
+            content:
+              type: string
+            published:
+              type: boolean
+      required: [blog_post]
+    BlogPostResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BlogPost'
+    BlogPostCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BlogPost'
+    Banner:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        image_url:
+          type: string
+        link_url:
+          type: string
+        active:
+          type: boolean
+    BannerRequest:
+      type: object
+      properties:
+        banner:
+          type: object
+          required: [title, image_url]
+          properties:
+            title:
+              type: string
+            image_url:
+              type: string
+            link_url:
+              type: string
+            active:
+              type: boolean
+      required: [banner]
+    BannerResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Banner'
+    BannerCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Banner'
+    AdminDashboard:
+      type: object
+      properties:
+        total_revenue:
+          type: number
+        total_orders:
+          type: integer
+        total_customers:
+          type: integer
+        recent_orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        top_products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    AdminDashboardResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/AdminDashboard'
+    AdminReport:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        orders:
+          type: integer
+        revenue:
+          type: number
+        discounts:
+          type: number
+    AdminReportCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/AdminReport'
