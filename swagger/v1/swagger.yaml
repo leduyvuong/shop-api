@@ -201,6 +201,107 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
+  /api/v1/addresses:
+    get:
+      tags: [Addresses]
+      summary: Danh sách địa chỉ của người dùng
+      responses:
+        '200':
+          description: Danh sách địa chỉ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressCollectionResponse'
+    post:
+      tags: [Addresses]
+      summary: Tạo địa chỉ mới
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+      responses:
+        '201':
+          description: Tạo địa chỉ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+  /api/v1/addresses/{id}:
+    get:
+      tags: [Addresses]
+      summary: Xem chi tiết địa chỉ
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết địa chỉ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+    put:
+      tags: [Addresses]
+      summary: Cập nhật địa chỉ
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+      responses:
+        '200':
+          description: Cập nhật địa chỉ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+    patch:
+      tags: [Addresses]
+      summary: Cập nhật địa chỉ (partial)
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+      responses:
+        '200':
+          description: Cập nhật địa chỉ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+    delete:
+      tags: [Addresses]
+      summary: Xóa địa chỉ
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Xóa địa chỉ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/addresses/{id}/set_default:
+    patch:
+      tags: [Addresses]
+      summary: Đặt địa chỉ mặc định
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Cập nhật địa chỉ mặc định
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
   /api/v1/categories:
     get:
       tags: [Categories]
@@ -1516,6 +1617,31 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/CartItem'
+    AddressRequest:
+      type: object
+      properties:
+        address:
+          type: object
+          required: [name, phone, province, district, ward, street]
+          properties:
+            name:
+              type: string
+            phone:
+              type: string
+            province:
+              type: string
+            district:
+              type: string
+            ward:
+              type: string
+            street:
+              type: string
+            default:
+              type: boolean
+            user_id:
+              type: integer
+              description: Chỉ dành cho admin để gán địa chỉ cho user khác
+      required: [address]
     Address:
       type: object
       properties:
@@ -1535,6 +1661,22 @@ components:
           type: string
         default:
           type: boolean
+    AddressResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Address'
+    AddressCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Address'
     OrderItem:
       type: object
       properties:

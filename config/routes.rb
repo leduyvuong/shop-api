@@ -13,6 +13,11 @@ Rails.application.routes.draw do
       end
 
       resources :users
+      resources :addresses do
+        member do
+          patch :set_default
+        end
+      end
       resources :categories do
         resources :products, only: :index
       end
