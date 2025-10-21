@@ -6,7 +6,7 @@ class Order < ApplicationRecord
   has_many :order_items, dependent: :destroy
   has_one :payment, dependent: :destroy
 
-  enum status: { pending: 0, paid: 1, shipped: 2, completed: 3, canceled: 4 }, _default: :pending
+  enum :status, { pending: 0, paid: 1, shipped: 2, completed: 3, canceled: 4 }, default: :pending
 
   validates :total_price, numericality: { greater_than_or_equal_to: 0 }
 

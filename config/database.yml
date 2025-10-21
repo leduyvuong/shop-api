@@ -1,10 +1,9 @@
 default: &default
   adapter: postgresql
   encoding: unicode
+  username: admin123
+  password:
   pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
-  username: <%= ENV.fetch('POSTGRES_USER', 'postgres') %>
-  password: <%= ENV.fetch('POSTGRES_PASSWORD', '') %>
-  host: <%= ENV.fetch('POSTGRES_HOST', 'localhost') %>
 
 development:
   <<: *default
@@ -17,6 +16,5 @@ test:
 production:
   <<: *default
   database: <%= ENV.fetch('POSTGRES_DB', 'shop_api_production') %>
-  username: <%= ENV.fetch('POSTGRES_USER') %>
-  password: <%= ENV.fetch('POSTGRES_PASSWORD') %>
-  host: <%= ENV.fetch('POSTGRES_HOST', 'localhost') %>
+  username: admin123
+  password:

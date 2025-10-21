@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'boot'
+require_relative '../middleware/request_logger'
 
 require 'rails/all'
 
@@ -10,6 +11,11 @@ module ShopApi
   class Application < Rails::Application
     config.load_defaults 7.2
     config.api_only = true
+
+    %w[app/services app/policies app/lib].each do |path|
+      config.autoload_paths << Rails.root.join(path)
+      config.eager_load_paths << Rails.root.join(path)
+    end
 
     config.middleware.use Rack::Attack
     config.middleware.insert_before 0, Rack::Cors do
@@ -23,13 +29,7 @@ module ShopApi
     end
 
     config.middleware.insert_after Rack::Runtime, Middleware::RequestLogger
-
     config.active_storage.service = :local
     config.active_job.queue_adapter = :async
-
-    %w[app/services app/policies app/lib middleware].each do |path|
-      config.autoload_paths << Rails.root.join(path)
-      config.eager_load_paths << Rails.root.join(path)
-    end
   end
 end

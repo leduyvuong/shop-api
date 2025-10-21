@@ -10,7 +10,7 @@ class Product < ApplicationRecord
   validates :name, :slug, :price, :stock, presence: true
   validates :slug, uniqueness: true
 
-  enum status: { draft: 0, active: 1, archived: 2 }, _default: :draft
+  enum :status, { draft: 0, active: 1, archived: 2 }, default: :draft
 
   scope :available, -> { active.where('stock > 0') }
   scope :search, lambda { |query|

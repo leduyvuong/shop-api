@@ -38,11 +38,25 @@ class ApplicationController < ActionController::API
   def current_user
     return @current_user if defined?(@current_user)
 
-    if defined?(Warden::JWTAuth)
-      @current_user = WardenAuthentication::Decoder.call(request)&.user
+    # Try to get user from JWT token
+    token = extract_jwt_token
+    if token
+      begin
+        decoded_token = JWT.decode(token, ENV.fetch('DEVISE_JWT_SECRET_KEY', 'secret-key'), true, { algorithm: 'HS256' })
+        user_id = decoded_token[0]['sub']
+        @current_user = User.find(user_id) if user_id
+      rescue JWT::DecodeError, ActiveRecord::RecordNotFound
+        @current_user = nil
+      end
     end
 
     @current_user
+  end
+
+  def extract_jwt_token
+    pattern = /^Bearer /i
+    header = request.headers['Authorization']
+    header.gsub(pattern, '') if header&.match(pattern)
   end
 
   def render_not_found(exception)

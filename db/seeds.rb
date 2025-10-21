@@ -97,13 +97,17 @@ rescue LoadError
 end
 
 puts 'Seeding users...'
-User.create!(name: 'Admin', email: 'admin@example.com', password: 'Password123', role: :admin)
+User.find_or_create_by!(email: 'admin@example.com') do |user|
+  user.name = 'Admin'
+  user.password = 'Password123'
+  user.role = :admin
+end
 20.times do
   User.create!(
     name: Faker::Name.name,
     email: Faker::Internet.unique.email,
     password: 'Password123',
-    phone: Faker::PhoneNumber.cell_phone
+    phone: "+84#{rand(100000000..999999999)}"
   )
 end
 
@@ -129,7 +133,7 @@ puts 'Seeding products...'
     category:,
     status: :active,
     weight: rand(0.5..5.0).round(2),
-    sku: Faker::Code.unique.asin,
+    sku: "SKU-#{SecureRandom.hex(8).upcase}",
     brand: Faker::Company.name
   )
   2.times do
@@ -148,7 +152,7 @@ end
 puts 'Seeding coupons...'
 5.times do
   Coupon.create!(
-    code: Faker::Code.unique.nric,
+    code: "COUPON-#{SecureRandom.hex(6).upcase}",
     discount_type: %i[percentage amount].sample,
     discount_value: rand(5..20),
     usage_limit: rand(10..50),

@@ -24,116 +24,48 @@ paths:
     post:
       tags: [Auth]
       summary: Đăng ký tài khoản mới
-      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                user:
-                  type: object
-                  required: [name, email, password]
-                  properties:
-                    name:
-                      type: string
-                      example: "John Doe"
-                    email:
-                      type: string
-                      format: email
-                      example: "john@example.com"
-                    password:
-                      type: string
-                      format: password
-                      example: "Password123"
-                    password_confirmation:
-                      type: string
-                      format: password
-                      example: "Password123"
-                    role:
-                      type: string
-                      enum: [customer, staff, admin]
-                      example: "customer"
+              $ref: '#/components/schemas/AuthSignUpRequest'
       responses:
         '201':
           description: Tạo tài khoản thành công
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: "Signed up successfully"
-                  data:
-                    type: object
-                    properties:
-                      user:
-                        $ref: '#/components/schemas/User'
-                      token:
-                        type: string
-                        description: "JWT token để xác thực"
+                $ref: '#/components/schemas/AuthResponse'
         '422':
           description: Dữ liệu không hợp lệ
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /api/v1/auth/sign_in:
     post:
       tags: [Auth]
       summary: Đăng nhập và lấy JWT token
-      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [email, password]
-              properties:
-                email:
-                  type: string
-                  format: email
-                  example: "admin@example.com"
-                password:
-                  type: string
-                  format: password
-                  example: "Password123"
+              $ref: '#/components/schemas/AuthSignInRequest'
       responses:
         '200':
           description: Đăng nhập thành công
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: "Signed in successfully"
-                  data:
-                    type: object
-                    properties:
-                      user:
-                        $ref: '#/components/schemas/User'
-                      token:
-                        type: string
-                        description: "JWT token để xác thực"
+                $ref: '#/components/schemas/AuthResponse'
         '401':
           description: Sai thông tin đăng nhập
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /api/v1/auth/sign_out:
     delete:
       tags: [Auth]
@@ -145,48 +77,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/auth/refresh:
     post:
       tags: [Auth]
       summary: Refresh JWT token
-      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [refresh_token]
-              properties:
-                refresh_token:
-                  type: string
-                  example: "eyJhbGciOiJIUzI1NiJ9..."
+              $ref: '#/components/schemas/AuthRefreshRequest'
       responses:
         '200':
           description: Refresh token thành công
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  data:
-                    type: object
-                    properties:
-                      user:
-                        $ref: '#/components/schemas/User'
-                      token:
-                        type: string
-        '401':
-          description: Token không hợp lệ
+                $ref: '#/components/schemas/AuthResponse'
+  /api/v1/auth/forgot_password:
+    post:
+      tags: [Auth]
+      summary: Gửi email quên mật khẩu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Email reset được gửi
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
+                $ref: '#/components/schemas/BaseResponse'
+  /api/v1/auth/reset_password:
+    post:
+      tags: [Auth]
+      summary: Đặt lại mật khẩu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Reset mật khẩu thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
   /api/v1/users:
     get:
       tags: [Users]
@@ -217,7 +158,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-
   /api/v1/users/{id}:
     get:
       tags: [Users]
@@ -261,7 +201,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/addresses:
     get:
       tags: [Addresses]
@@ -289,7 +228,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AddressResponse'
-
   /api/v1/addresses/{id}:
     get:
       tags: [Addresses]
@@ -351,7 +289,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/addresses/{id}/set_default:
     patch:
       tags: [Addresses]
@@ -365,7 +302,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AddressResponse'
-
   /api/v1/categories:
     get:
       tags: [Categories]
@@ -393,7 +329,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryResponse'
-
   /api/v1/categories/{id}:
     get:
       tags: [Categories]
@@ -437,7 +372,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/categories/{category_id}/products:
     get:
       tags: [Products]
@@ -455,7 +389,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductCollectionResponse'
-
   /api/v1/products:
     get:
       tags: [Products]
@@ -496,7 +429,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductResponse'
-
   /api/v1/products/{id}:
     get:
       tags: [Products]
@@ -540,7 +472,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/products/{product_id}/variants:
     get:
       tags: [Variants]
@@ -580,7 +511,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VariantResponse'
-
   /api/v1/products/{product_id}/variants/{id}:
     put:
       tags: [Variants]
@@ -622,7 +552,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/products/{product_id}/product_images:
     get:
       tags: [Product Images]
@@ -662,7 +591,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductImageResponse'
-
   /api/v1/products/{product_id}/product_images/{id}:
     delete:
       tags: [Product Images]
@@ -681,7 +609,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/products/{product_id}/reviews:
     get:
       tags: [Reviews]
@@ -721,7 +648,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReviewResponse'
-
   /api/v1/reviews:
     get:
       tags: [Reviews]
@@ -736,7 +662,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReviewCollectionResponse'
-
   /api/v1/reviews/{id}:
     get:
       tags: [Reviews]
@@ -780,7 +705,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/cart:
     get:
       tags: [Cart]
@@ -808,7 +732,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CartItemResponse'
-
   /api/v1/cart/{id}:
     put:
       tags: [Cart]
@@ -840,7 +763,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/orders:
     get:
       tags: [Orders]
@@ -871,7 +793,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderResponse'
-
   /api/v1/orders/{id}:
     get:
       tags: [Orders]
@@ -915,7 +836,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/orders/{id}/cancel:
     post:
       tags: [Orders]
@@ -929,7 +849,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderResponse'
-
   /api/v1/orders/{id}/complete:
     post:
       tags: [Orders]
@@ -943,7 +862,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderResponse'
-
   /api/v1/orders/{id}/ship:
     post:
       tags: [Orders]
@@ -957,7 +875,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderResponse'
-
   /api/v1/orders/{order_id}/payments:
     get:
       tags: [Payments]
@@ -997,7 +914,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentResponse'
-
   /api/v1/payments:
     get:
       tags: [Payments]
@@ -1009,7 +925,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentCollectionResponse'
-
   /api/v1/payments/{id}:
     get:
       tags: [Payments]
@@ -1023,7 +938,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentResponse'
-
   /api/v1/coupons:
     get:
       tags: [Coupons]
@@ -1035,7 +949,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CouponCollectionResponse'
-
   /api/v1/coupons/{id}:
     get:
       tags: [Coupons]
@@ -1049,7 +962,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CouponResponse'
-
   /api/v1/coupons/apply:
     post:
       tags: [Coupons]
@@ -1067,7 +979,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CouponResponse'
-
   /api/v1/blog_posts:
     get:
       tags: [Blog Posts]
@@ -1095,7 +1006,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BlogPostResponse'
-
   /api/v1/blog_posts/{id}:
     get:
       tags: [Blog Posts]
@@ -1139,7 +1049,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/banners:
     get:
       tags: [Banners]
@@ -1167,7 +1076,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BannerResponse'
-
   /api/v1/banners/{id}:
     get:
       tags: [Banners]
@@ -1211,7 +1119,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-
   /api/v1/admin/dashboard:
     get:
       tags: [Admin]
@@ -1223,7 +1130,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdminDashboardResponse'
-
   /api/v1/admin/reports:
     get:
       tags: [Admin]
@@ -1246,7 +1152,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdminReportCollectionResponse'
-
 components:
   securitySchemes:
     bearerAuth:
@@ -1308,6 +1213,69 @@ components:
           type: integer
         total_count:
           type: integer
+    AuthResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+                token:
+                  type: string
+                refresh_token:
+                  type: string
+    AuthSignUpRequest:
+      type: object
+      properties:
+        user:
+          type: object
+          required: [name, email, password]
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+            password:
+              type: string
+            password_confirmation:
+              type: string
+            role:
+              type: string
+              enum: [customer, staff, admin]
+      required: [user]
+    AuthSignInRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    AuthRefreshRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+    ResetPasswordRequest:
+      type: object
+      required: [reset_token, password, password_confirmation]
+      properties:
+        reset_token:
+          type: string
+        password:
+          type: string
+        password_confirmation:
+          type: string
     User:
       type: object
       properties:

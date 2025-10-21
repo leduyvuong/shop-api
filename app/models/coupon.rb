@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Coupon < ApplicationRecord
-  enum discount_type: { percentage: 0, amount: 1 }, _default: :percentage
+  enum :discount_type, { percentage: 0, amount: 1 }, default: :percentage
 
   validates :code, :discount_type, :discount_value, presence: true
   validates :code, uniqueness: true

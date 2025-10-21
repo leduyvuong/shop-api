@@ -50,8 +50,8 @@ Rails.application.routes.draw do
         resources :reports, only: :index
       end
 
-      mount Rswag::Ui::Engine => '/docs'
-      mount Rswag::Api::Engine => '/docs'
+      get 'docs', to: 'docs#index'
+      get 'docs/v1/swagger.yaml', to: 'docs#swagger_yaml'
     end
   end
 end
